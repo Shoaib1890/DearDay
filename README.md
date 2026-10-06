@@ -1,56 +1,159 @@
-# Welcome to your Expo app 👋
+# DearDay
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Never forget someone's special day.**
 
-## Get started
+DearDay is an offline-first Android birthday reminder app built with Expo and React Native. Store birthdays for people you care about, see what is coming up, and get local notifications on their day—even when the app is closed.
 
-1. Install dependencies
+- **Package:** `com.dearday.app`
+- **Version:** `1.0.0` (Android `versionCode` 1)
+- **Expo project:** [@shy1890/dearday](https://expo.dev/accounts/shy1890/projects/dearday)
 
-   ```bash
-   npm install
-   ```
+No account, no backend, no cloud database. Data stays on the device unless you export it.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Features
 
-In the output, you'll find options to open the app in a
+| Area | Details |
+| --- | --- |
+| People | Add, edit, delete; name, birthday, relationship, photo, phone, notes |
+| Dates | Age, next birthday, countdown; Feb 29 → Feb 28 in non-leap years |
+| Home | Greeting, today's birthdays, upcoming list, first-launch welcome |
+| People tab | Search, sort by upcoming or A–Z |
+| Reminders | Local notifications (default 9:00 AM), per-person on/off and time |
+| Appearance | System, light, or dark theme |
+| Data | JSON export / import, clear all |
+| Actions | Call and SMS when a phone number is set |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Tech stack
 
-## Get a fresh project
+- React Native 0.86 · Expo SDK 57 · TypeScript (strict)
+- Expo Router · AsyncStorage · expo-notifications
+- expo-image-picker · expo-file-system · expo-document-picker · expo-sharing
+- EAS Build for Android production `.aab`
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
+## Project structure
+
+```text
+dearday/
+├── app.json              # Expo config (name, package, plugins)
+├── eas.json              # EAS build profiles (preview APK, production AAB)
+├── src/
+│   ├── app/              # Expo Router screens
+│   ├── components/
+│   ├── constants/        # Theme & colors (#1A7F5A)
+│   ├── hooks/
+│   ├── lib/              # Storage, dates, notifications, validation
+│   └── types/
+├── assets/images/        # Icon & splash
+├── releases/             # Local .aab copies (gitignored)
+└── scripts/verify-dates.ts
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-### Other setup steps
+## Prerequisites
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+- Node.js 20+ and npm
+- [Expo Go](https://expo.dev/go) on your phone (UI testing only)
+- [EAS CLI](https://docs.expo.dev/build/setup/) for real builds: `npm install -g eas-cli`
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## Local development
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm install
+npm run start          # Expo Go (press s in terminal if needed)
+npm run typecheck
+```
 
-## Join the community
+**Android reminders do not work in Expo Go** (SDK 53+). Use a preview/production build for notification testing.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Android builds (EAS)
+
+Log in once:
+
+```bash
+eas login
+```
+
+| Profile | Output | Use |
+| --- | --- | --- |
+| `preview` | APK | Install on device, test reminders |
+| `production` | AAB | Google Play Store |
+
+```bash
+eas build --platform android --profile preview
+eas build --platform android --profile production
+```
+
+Download artifacts from the [Expo builds page](https://expo.dev/accounts/shy1890/projects/dearday/builds) or save copies under `releases/` (gitignored).
+
+Submit to Play (optional):
+
+```bash
+eas submit --platform android --profile production
+```
+
+---
+
+## Notifications (production builds)
+
+- One scheduled local notification per person: id `birthday:<personId>`
+- Rescheduled on app launch and when people are saved, edited, or deleted
+- Tap opens that person's screen
+- **Expo Go on Android:** notifications are disabled (stub); UI still works
+
+---
+
+## Privacy
+
+- No login, no analytics, no contacts/location/camera permissions
+- Photos via system picker only; stored in app private storage
+- In-app policy: Settings → Privacy Policy
+
+---
+
+## Play Store checklist (manual)
+
+1. Google Play Console developer account ($25 one-time)
+2. Store listing, screenshots, content rating, Data safety (on-device data, no collection)
+3. Public privacy policy URL if required
+4. Upload production `.aab`; new personal accounts may need closed testing first
+5. Bump `version` and `android.versionCode` in `app.json` for each new release
+
+---
+
+## Push this repo to GitHub (when ready)
+
+From this directory (`dearday/`):
+
+```bash
+git remote add origin <YOUR_REPO_URL>
+git add .
+git commit -m "DearDay 1.0.0 — initial release"
+git push -u origin main
+```
+
+Do **not** commit `.aab` / `.apk` files, `.env`, or keystore files. The production bundle you downloaded can live in `releases/` or outside the repo.
+
+---
+
+## Known limitations
+
+- Expo Go cannot test Android birthday notifications
+- Export/import may not include photo files across devices
+- Next-year reminders are refreshed when the app runs after a birthday fires
+
+---
+
+## License
+
+Copyright © 2026. All rights reserved. This app is not open source unless you choose to license it otherwise.
